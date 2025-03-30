@@ -33,9 +33,9 @@ def test_scrape_top_movies_network_error(mock_fetch_page):
     movies = scraper.scrape_top_movies()
     assert movies == []
 
-@patch('scraper.open', new_callable=mock_open)
-@patch('scraper.os.path.exists', return_value=True)
-def test_save_movies(mock_exists, mock_file):
+@patch('os.path.exists', return_value=True)
+@patch('builtins.open', new_callable=mock_open)
+def test_save_movies(mock_file, mock_exists):
     movies = [{'title': 'Test Movie', 'rating': 9.0, 'num_reviews': 1000, 'num_oscars': 0}]
 
     scraper.save_movies(movies, filename='output.json')
@@ -44,9 +44,9 @@ def test_save_movies(mock_exists, mock_file):
     handle = mock_file()
     handle.write.assert_called()
 
-@patch('scraper.open', side_effect=Exception("Disk error"))
-@patch('scraper.os.path.exists', return_value=True)
-def test_save_movies_exception(mock_exists, mock_file):
+@patch('os.path.exists', return_value=True)
+@patch('builtins.open', side_effect=Exception("Disk error"))
+def test_save_movies_exception(mock_file, mock_exists):
     movies = [{'title': 'Test Movie', 'rating': 9.0, 'num_reviews': 1000, 'num_oscars': 0}]
 
     scraper.save_movies(movies, filename='output.json')

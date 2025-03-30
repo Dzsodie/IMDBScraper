@@ -1,0 +1,128 @@
+{
+    "Movie Title 1": {
+        "title": "Movie Title 1",
+        "rating": 9.2,
+        "num_reviews": 1000000,
+        "num_oscars": 2
+    },
+    "1. The Shawshank Redemption": {
+        "title": "1. The Shawshank Redemption",
+        "rating": 9.3,
+        "num_reviews": 3000000,
+        "num_oscars": 0
+    },
+    "2. The Godfather": {
+        "title": "2. The Godfather",
+        "rating": 9.2,
+        "num_reviews": 2100000,
+        "num_oscars": 3
+    },
+    "3. The Dark Knight": {
+        "title": "3. The Dark Knight",
+        "rating": 9.0,
+        "num_reviews": 3000000,
+        "num_oscars": 2
+    },
+    "4. The Godfather Part II": {
+        "title": "4. The Godfather Part II",
+        "rating": 9.0,
+        "num_reviews": 1400000,
+        "num_oscars": 6
+    },
+    "5. 12 Angry Men": {
+        "title": "5. 12 Angry Men",
+        "rating": 9.0,
+        "num_reviews": 919000,
+        "num_oscars": 0
+    },
+    "6. The Lord of the Rings: The Return of the King": {
+        "title": "6. The Lord of the Rings: The Return of the King",
+        "rating": 9.0,
+        "num_reviews": 2100000,
+        "num_oscars": 11
+    },
+    "7. Schindler's List": {
+        "title": "7. Schindler's List",
+        "rating": 9.0,
+        "num_reviews": 1500000,
+        "num_oscars": 7
+    },
+    "8. Pulp Fiction": {
+        "title": "8. Pulp Fiction",
+        "rating": 8.9,
+        "num_reviews": 2300000,
+        "num_oscars": 1
+    },
+    "9. The Lord of the Rings: The Fellowship of the Ring": {
+        "title": "9. The Lord of the Rings: The Fellowship of the Ring",
+        "rating": 8.9,
+        "num_reviews": 2100000,
+        "num_oscars": 4
+    },
+    "10. Il buono, il brutto, il cattivo": {
+        "title": "10. Il buono, il brutto, il cattivo",
+        "rating": 8.8,
+        "num_reviews": 848000,
+        "num_oscars": 0
+    },
+    "11. Forrest Gump": {
+        "title": "11. Forrest Gump",
+        "rating": 8.8,
+        "num_reviews": 2400000,
+        "num_oscars": 6
+    },
+    "12. The Lord of the Rings: The Two Towers": {
+        "title": "12. The Lord of the Rings: The Two Towers",
+        "rating": 8.8,
+        "num_reviews": 1900000,
+        "num_oscars": 2
+    },
+    "13. Fight Club": {
+        "title": "13. Fight Club",
+        "rating": 8.8,
+        "num_reviews": 2400000,
+        "num_oscars": 0
+    },
+    "14. Inception": {
+        "title": "14. Inception",
+        "rating": 8.8,
+        "num_reviews": 2700000,
+        "num_oscars": 4
+    },
+    "15. Star Wars: Episode V - The Empire Strikes Back": {
+        "title": "15. Star Wars: Episode V - The Empire Strikes Back",
+        "rating": 8.7,
+        "num_reviews": 1400000,
+        "num_oscars": 1
+    },
+    "16. The Matrix": {
+        "title": "16. The Matrix",
+        "rating": 8.7,
+        "num_reviews": 2100000,
+        "num_oscars": 4
+    },
+    "17. GoodFellas": {
+        "title": "17. GoodFellas",
+        "rating": 8.7,
+        "num_reviews": 1300000,
+        "num_oscars": 1
+    },
+    "18. One Flew Over the Cuckoo's Nest": {
+        "title": "18. One Flew Over the Cuckoo's Nest",
+        "rating": 8.7,
+        "num_reviews": 1100000,
+        "num_oscars": 5
+    },
+    "19. Interstellar": {
+        "title": "19. Interstellar",
+        "rating": 8.7,
+        "num_reviews": 2300000,
+        "num_oscars": 1
+    },
+    "20. Se7en": {
+        "title": "20. Se7en",
+        "rating": 8.6,
+        "num_reviews": 1900000,
+        "num_oscars": 0
+    }
+}
