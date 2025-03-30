@@ -6,7 +6,13 @@ from rating_adjuster import apply_review_balancer, apply_oscar_bonus
 IMDB_TOP_URL = "https://www.imdb.com/chart/top/"
 
 def scrape_top_movies(limit=20):
-    response = requests.get(IMDB_TOP_URL)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/123.0.0.0 Safari/537.36"
+    }
+
+    response = requests.get(IMDB_TOP_URL, headers=headers)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -20,8 +26,8 @@ def scrape_top_movies(limit=20):
         num_reviews_str = row.select_one('.ipc-rating-star--voteCount').text.strip('()').replace(',', '')
         num_reviews = int(num_reviews_str)
         
-        # Note: Oscar data is not available on this page; placeholder for now
-        num_oscars = 0  # Placeholder
+        # Oscars data isn't directly on this page; placeholder for now.
+        num_oscars = 0
         
         movies.append({
             "title": title,
