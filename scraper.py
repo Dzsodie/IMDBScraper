@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+import json
+from rating_adjuster import apply_review_balancer, apply_oscar_bonus
 
 IMDB_TOP_URL = "https://www.imdb.com/chart/top/"
 
@@ -32,4 +34,11 @@ def scrape_top_movies(limit=20):
 
 if __name__ == "__main__":
     movies = scrape_top_movies()
-    print(movies)
+    apply_review_balancer(movies)
+    apply_oscar_bonus(movies)
+    
+    movies.sort(key=lambda m: m['adjusted_rating'], reverse=True)
+
+    with open('output.json', 'w') as f:
+        json.dump(movies, f, indent=4)
+    print("Results written to output.json")
