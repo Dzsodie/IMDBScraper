@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import patch, Mock, mock_open
 import scraper
+from model.movie import Movie
 
 @patch('scraper.fetch_page')
 def test_scrape_top_movies_success(mock_fetch_page):
@@ -17,16 +18,18 @@ def test_scrape_top_movies_success(mock_fetch_page):
 
     mock_soup.select.return_value = [mock_row]
 
-    with patch('scraper.parse_num_reviews', return_value=1000000) as mock_reviews, \
-         patch('scraper.parse_oscar_count', return_value=2) as mock_oscars:
+    with patch('scraper.parse_num_reviews', return_value=1000000), \
+         patch('scraper.parse_oscar_count', return_value=2), \
+         patch('scraper.load_cache', return_value={}), \
+         patch('scraper.save_cache'):
 
         movies = scraper.scrape_top_movies(limit=1)
 
         assert len(movies) == 1
-        assert movies[0]['title'] == 'Movie Title 1'
-        assert movies[0]['rating'] == 9.2
-        assert movies[0]['num_reviews'] == 1000000
-        assert movies[0]['num_oscars'] == 2
+        assert movies[0].title == 'Movie Title 1'
+        assert movies[0].rating == 9.2
+        assert movies[0].num_reviews == 1000000
+        assert movies[0].num_oscars == 2
 
 @patch('scraper.fetch_page', side_effect=Exception("Network error"))
 def test_scrape_top_movies_network_error(mock_fetch_page):
@@ -36,7 +39,7 @@ def test_scrape_top_movies_network_error(mock_fetch_page):
 @patch('os.path.exists', return_value=True)
 @patch('builtins.open', new_callable=mock_open)
 def test_save_movies(mock_file, mock_exists):
-    movies = [{'title': 'Test Movie', 'rating': 9.0, 'num_reviews': 1000, 'num_oscars': 0}]
+    movies = [Movie('Test Movie', 9.0, 1000, 0)]
 
     scraper.save_movies(movies, filename='output.json')
 
@@ -47,7 +50,7 @@ def test_save_movies(mock_file, mock_exists):
 @patch('os.path.exists', return_value=True)
 @patch('builtins.open', side_effect=Exception("Disk error"))
 def test_save_movies_exception(mock_file, mock_exists):
-    movies = [{'title': 'Test Movie', 'rating': 9.0, 'num_reviews': 1000, 'num_oscars': 0}]
+    movies = [Movie('Test Movie', 9.0, 1000, 0)]
 
     scraper.save_movies(movies, filename='output.json')
     # Ensure exception handled gracefully without crashing

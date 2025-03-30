@@ -2,6 +2,7 @@ from imdb_parser import fetch_page, parse_num_reviews, parse_oscar_count
 from rating_adjuster import apply_review_balancer, apply_oscar_bonus
 from utils.logging_config import setup_logging
 from utils.cache_utils import load_cache, save_cache
+from model.movie import Movie
 import logging
 import json
 import os
@@ -25,10 +26,10 @@ def scrape_top_movies(limit=20):
         try:
             title_tag = row.select_one('h3')
             title = title_tag.text.strip()
-            
+
             if title in cache:
                 logging.info(f"Loaded '{title}' from cache.")
-                movie = cache[title]
+                movie = Movie.from_dict(cache[title])
             else:
                 logging.info(f"Fetching details for '{title}' from IMDb.")
                 rating_tag = row.select_one('.ipc-rating-star--imdb')
@@ -41,13 +42,8 @@ def scrape_top_movies(limit=20):
                 movie_url = f"https://www.imdb.com{movie_page_path}"
                 num_oscars = parse_oscar_count(movie_url)
 
-                movie = {
-                    "title": title,
-                    "rating": rating,
-                    "num_reviews": num_reviews,
-                    "num_oscars": num_oscars
-                }
-                cache[title] = movie
+                movie = Movie(title, rating, num_reviews, num_oscars)
+                cache[title] = movie.to_dict()
 
             movies.append(movie)
         except Exception as e:
@@ -59,7 +55,7 @@ def scrape_top_movies(limit=20):
 def save_movies(movies, filename='output.json'):
     try:
         with open(filename, 'w') as f:
-            json.dump(movies, f, indent=4)
+            json.dump([movie.to_dict() for movie in movies], f, indent=4)
         logging.info(f"Results successfully written to '{filename}'.")
     except Exception as e:
         logging.error(f"Failed to save movies to '{filename}': {e}")
@@ -69,7 +65,7 @@ if __name__ == "__main__":
     if movies:
         apply_review_balancer(movies)
         apply_oscar_bonus(movies)
-        movies.sort(key=lambda m: m['adjusted_rating'], reverse=True)
+        movies.sort(key=lambda m: m.adjusted_rating, reverse=True)
         save_movies(movies)
     else:
         logging.warning("No movies to process.")
