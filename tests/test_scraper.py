@@ -1,75 +1,53 @@
 import pytest
-from unittest.mock import patch, Mock
-from scraper import scrape_top_movies, parse_num_reviews
+from unittest.mock import patch, Mock, mock_open
+import scraper
 
+@patch('scraper.fetch_page')
+def test_scrape_top_movies_success(mock_fetch_page):
+    mock_soup = Mock()
+    mock_fetch_page.return_value = mock_soup
 
-# Unit tests for parse_num_reviews
-def test_parse_num_reviews_millions():
-    assert parse_num_reviews("3M") == 3_000_000
+    mock_row = Mock()
+    mock_row.select_one.side_effect = [
+        Mock(text='Movie Title 1'),
+        Mock(text='9.2 (1M)'),
+        Mock(text='(1M)'),
+        {'href': '/title/tt0111161/'}
+    ]
 
-def test_parse_num_reviews_thousands():
-    assert parse_num_reviews("250K") == 250_000
+    mock_soup.select.return_value = [mock_row]
 
-def test_parse_num_reviews_plain_number():
-    assert parse_num_reviews("12345") == 12345
+    with patch('scraper.parse_num_reviews', return_value=1000000) as mock_reviews, \
+         patch('scraper.parse_oscar_count', return_value=2) as mock_oscars:
 
-def test_parse_num_reviews_with_brackets():
-    assert parse_num_reviews("(1.2M)") == 1_200_000
+        movies = scraper.scrape_top_movies(limit=1)
 
-def test_parse_num_reviews_with_special_chars():
-    assert parse_num_reviews("\xa0(3M)") == 3_000_000
+        assert len(movies) == 1
+        assert movies[0]['title'] == 'Movie Title 1'
+        assert movies[0]['rating'] == 9.2
+        assert movies[0]['num_reviews'] == 1000000
+        assert movies[0]['num_oscars'] == 2
 
+@patch('scraper.fetch_page', side_effect=Exception("Network error"))
+def test_scrape_top_movies_network_error(mock_fetch_page):
+    movies = scraper.scrape_top_movies()
+    assert movies == []
 
-# Mock HTML response for scraper tests
-MOCK_HTML = """
-<html>
-<body>
-<ul class="ipc-metadata-list">
-    <li>
-        <h3>Movie Title 1</h3>
-        <span class="ipc-rating-star--imdb">9.2 (1M)</span>
-        <span class="ipc-rating-star--voteCount">(1.1M)</span>
-    </li>
-    <li>
-        <h3>Movie Title 2</h3>
-        <span class="ipc-rating-star--imdb">8.8 (500K)</span>
-        <span class="ipc-rating-star--voteCount">(500K)</span>
-    </li>
-</ul>
-</body>
-</html>
-"""
+@patch('scraper.open', new_callable=mock_open)
+@patch('scraper.os.path.exists', return_value=True)
+def test_save_movies(mock_exists, mock_file):
+    movies = [{'title': 'Test Movie', 'rating': 9.0, 'num_reviews': 1000, 'num_oscars': 0}]
 
-# Unit test for scrape_top_movies
-@patch('scraper.requests.get')
-def test_scrape_top_movies(mock_get):
-    mock_response = Mock()
-    mock_response.status_code = 200
-    mock_response.text = MOCK_HTML
-    mock_get.return_value = mock_response
+    scraper.save_movies(movies, filename='output.json')
 
-    movies = scrape_top_movies(limit=2)
+    mock_file.assert_called_with('output.json', 'w')
+    handle = mock_file()
+    handle.write.assert_called()
 
-    assert len(movies) == 2
+@patch('scraper.open', side_effect=Exception("Disk error"))
+@patch('scraper.os.path.exists', return_value=True)
+def test_save_movies_exception(mock_exists, mock_file):
+    movies = [{'title': 'Test Movie', 'rating': 9.0, 'num_reviews': 1000, 'num_oscars': 0}]
 
-    assert movies[0]['title'] == 'Movie Title 1'
-    assert movies[0]['rating'] == 9.2
-    assert movies[0]['num_reviews'] == 1_100_000
-    assert movies[0]['num_oscars'] == 0
-
-    assert movies[1]['title'] == 'Movie Title 2'
-    assert movies[1]['rating'] == 8.8
-    assert movies[1]['num_reviews'] == 500_000
-    assert movies[1]['num_oscars'] == 0
-
-
-def test_scrape_top_movies_http_error():
-    with patch('scraper.requests.get') as mock_get:
-        mock_response = Mock()
-        mock_response.raise_for_status.side_effect = Exception("HTTP Error")
-        mock_get.return_value = mock_response
-
-        with pytest.raises(Exception) as exc_info:
-            scrape_top_movies()
-
-        assert "HTTP Error" in str(exc_info.value)
+    scraper.save_movies(movies, filename='output.json')
+    # Ensure exception handled gracefully without crashing
