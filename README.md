@@ -9,13 +9,21 @@
 
 A Python-based solution that scraps data from IMDB and creates a curated rating for the top 20 movies. This solution is created for interview challenge purpose, it uses BeautifulSoup4 scraper and Python's requests library. It writes the 20 top movies with rating into a json file.
 
-### Requirements:
-- Python 3.8+
-- Dependencies (`pip install -r requirements.txt`)
-
 ### Features
 - scraper to call to IMDB and get raw data
 - rating adjuster to curate data scraped from IMDB
+- result written to `output.json`
+- simple caching to reduce scraping time
+
+### Prerequisites
+1. Make sure Python 3.8+ is installed.
+    ```bash
+    python3 --version
+    ```
+2. Install dependencies of Requests and BeautifySoup4 by running this command.  
+    ```bash
+    pip3 install -r requirements.txt
+    ```
 
 ### Steps to Run the Application Locally
 1. Clone this repository to your local machine:
@@ -27,9 +35,24 @@ A Python-based solution that scraps data from IMDB and creates a curated rating 
     ```bash
     python3 scraper.py
     ```
-    
+
 ### Run tests
 1. Use the following command while in the directory of the IMDBScraper
     ```bash
     python3 -m pytest
     ```
+2. Running specific test file use this command
+    ```bash
+    python3 -m pytest tests/test_scraper.py
+    ```
+    
+### Logging
+    Logs are saved to `app.log` file. Log level can be adjusted in `logging_config.py`
+
+### Further enhancements
+- log aggregation
+- config file for different settings
+- persistency in DB
+
+### License
+    This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
