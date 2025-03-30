@@ -1,43 +1,28 @@
-import requests
-from bs4 import BeautifulSoup
-import json
+from imdb_parser import fetch_page, parse_num_reviews, parse_oscar_count
 from rating_adjuster import apply_review_balancer, apply_oscar_bonus
+import json
 
 IMDB_TOP_URL = "https://www.imdb.com/chart/top/"
 
-def parse_num_reviews(num_reviews_str):
-    num_reviews_str = num_reviews_str.replace('\xa0', '').replace('(', '').replace(')', '').strip()
-    if 'K' in num_reviews_str:
-        return int(float(num_reviews_str.replace('K', '')) * 1_000)
-    elif 'M' in num_reviews_str:
-        return int(float(num_reviews_str.replace('M', '')) * 1_000_000)
-    else:
-        return int(num_reviews_str.replace(',', ''))
-
 def scrape_top_movies(limit=20):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                      "AppleWebKit/537.36 (KHTML, like Gecko) "
-                      "Chrome/123.0.0.0 Safari/537.36"
-    }
-
-    response = requests.get(IMDB_TOP_URL, headers=headers)
-    response.raise_for_status()
-
-    soup = BeautifulSoup(response.text, 'html.parser')
-    movies = []
-
+    soup = fetch_page(IMDB_TOP_URL)
     rows = soup.select('ul.ipc-metadata-list li')[:limit]
 
+    movies = []
     for row in rows:
-        title = row.select_one('h3').text.strip()
-        rating = float(row.select_one('.ipc-rating-star--imdb').text.split()[0])
-        num_reviews_str = row.select_one('.ipc-rating-star--voteCount').text
-        num_reviews = parse_num_reviews(num_reviews_str)
+        title_tag = row.select_one('h3')
+        title = title_tag.text.strip()
         
-        # Oscars data isn't directly on this page; placeholder for now.
-        num_oscars = 0
+        rating_tag = row.select_one('.ipc-rating-star--imdb')
+        rating = float(rating_tag.text.split()[0])
         
+        reviews_tag = row.select_one('.ipc-rating-star--voteCount')
+        num_reviews = parse_num_reviews(reviews_tag.text)
+        
+        movie_page_path = row.select_one('a.ipc-title-link-wrapper')['href']
+        movie_url = f"https://www.imdb.com{movie_page_path}"
+        num_oscars = parse_oscar_count(movie_url)
+
         movies.append({
             "title": title,
             "rating": rating,
@@ -47,13 +32,14 @@ def scrape_top_movies(limit=20):
 
     return movies
 
+def save_movies(movies, filename='output.json'):
+    with open(filename, 'w') as f:
+        json.dump(movies, f, indent=4)
+
 if __name__ == "__main__":
     movies = scrape_top_movies()
     apply_review_balancer(movies)
     apply_oscar_bonus(movies)
-    
     movies.sort(key=lambda m: m['adjusted_rating'], reverse=True)
-
-    with open('output.json', 'w') as f:
-        json.dump(movies, f, indent=4)
+    save_movies(movies)
     print("Results written to output.json")
